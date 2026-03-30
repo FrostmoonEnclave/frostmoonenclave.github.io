@@ -181,3 +181,12 @@ async function copyOutput() {
     showToast("Copied!");
 }
 
+// Preload stickers for instant switching
+window.addEventListener('load', () => {
+    themes.forEach(theme => {
+        if (theme.sticker) {
+            const img = new Image();
+            img.src = theme.sticker;
+        }
+    });
+});
