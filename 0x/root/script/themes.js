@@ -17,7 +17,7 @@ const themes = [
         name: "Hu Tao",
         class: "theme-hutao",
         sticker: "https://frostmoonenclave.github.io/0x/root/media/HuTaoStatic.png",
-        indicator: "https://frostmoonenclave.github.io/0x/root/media/HuTao.gif",
+        indicator: "./0x/root/media/HuTao.gif",
         primary: "#ac1e1e",
         primaryDark: "#ff8a65",
         headerDark: "#261515",
