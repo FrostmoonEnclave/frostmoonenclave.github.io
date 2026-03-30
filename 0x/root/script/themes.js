@@ -2,8 +2,8 @@ const themes = [
     {
         name: "Furina",
         class: "theme-furina",
-        sticker: "/root/media/FurinaStatic.png",
-        indicator: "/root/media/GenshinImpact.mp4",
+        sticker: "https://frostmoonenclave.github.io/0x/root/media/FurinaStatic.png",
+        indicator: "https://frostmoonenclave.github.io/0x/root/media/GenshinImpact.mp4",
         primary: "#698ae8",
         primaryDark: "#8ab4f8",
         headerDark: "#131c30",
@@ -16,8 +16,8 @@ const themes = [
     {
         name: "Hu Tao",
         class: "theme-hutao",
-        sticker: "/root/media/HuTaoStatic.png",
-        indicator: "/root/media/HuTao.gif",
+        sticker: "https://frostmoonenclave.github.io/0x/root/media/HuTaoStatic.png",
+        indicator: "https://frostmoonenclave.github.io/0x/root/media/HuTao.gif",
         primary: "#ac1e1e",
         primaryDark: "#ff8a65",
         headerDark: "#261515",
@@ -30,8 +30,8 @@ const themes = [
     {
         name: "Shogun ♡",
         class: "theme-shogun",
-        sticker: "/root/media/Shogun0.gif",
-        indicator: "/root/media/IndicatorShogun.mp4",
+        sticker: "https://frostmoonenclave.github.io/0x/root/media/Shogun0.gif",
+        indicator: "https://frostmoonenclave.github.io/0x/root/media/IndicatorShogun.mp4",
         primary: "#2a2263",
         primaryDark: "#8e5ce3",
         headerDark: "#1d152e",
@@ -44,8 +44,8 @@ const themes = [
     {
         name: "Nahida",
         class: "theme-nahida",
-        sticker: "/root/media/NahidaStatic.png",
-        indicator: "/root/media/Nahida.gif",
+        sticker: "https://frostmoonenclave.github.io/0x/root/media/NahidaStatic.png",
+        indicator: "https://frostmoonenclave.github.io/0x/root/media/Nahida.gif",
         primary: "#7a9e1d",
         primaryDark: "#b5dd47",
         headerDark: "#1a2111",
@@ -58,7 +58,7 @@ const themes = [
     {
         name: "Zhongli",
         class: "theme-zhongli",
-        sticker: "/root/media/ZhongliStatic.webp",
+        sticker: "https://frostmoonenclave.github.io/0x/root/media/ZhongliStatic.webp",
         indicator: "",
         primary: "#614539",
         primaryDark: "#e8c660",
@@ -72,7 +72,7 @@ const themes = [
     {
         name: "Venti",
         class: "theme-venti",
-        sticker: "/root/media/VentiStatic.png",
+        sticker: "https://frostmoonenclave.github.io/0x/root/media/VentiStatic.png",
         indicator: "",
         primary: "#33987b",
         primaryDark: "#33987b",
@@ -86,7 +86,7 @@ const themes = [
     {
         name: "Shenhe",
         class: "theme-shenhe",
-        sticker: "/root/media/ShenheStatic.webp",
+        sticker: "https://frostmoonenclave.github.io/0x/root/media/ShenheStatic.webp",
         indicator: "",
         primary: "#8eb4ab",
         primaryDark: "#c0d8dd",
@@ -100,8 +100,8 @@ const themes = [
     {
         name: "Columbina",
         class: "theme-columbina",
-        sticker: "/root/media/ColumbinaStatic.webp",
-        indicator: "/root/media/IndicatorColumbina.mp4",
+        sticker: "https://frostmoonenclave.github.io/0x/root/media/ColumbinaStatic.webp",
+        indicator: "https://frostmoonenclave.github.io/0x/root/media/IndicatorColumbina.mp4",
         primary: "#dc2f7e",
         primaryDark: "#ff89c4",
         headerDark: "#2b1620",
@@ -114,7 +114,7 @@ const themes = [
     {
         name: "Skirk",
         class: "theme-skirk",
-        sticker: "/root/media/SkirkStatic.webp",
+        sticker: "https://frostmoonenclave.github.io/0x/root/media/SkirkStatic.webp",
         indicator: "/root/media/IndicatorSkirk.mp4",
         primary: "#3622fe",
         primaryDark: "#6a68f1", //a5abd6
