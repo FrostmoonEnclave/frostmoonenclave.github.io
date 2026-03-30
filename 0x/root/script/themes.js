@@ -2,8 +2,8 @@ const themes = [
     {
         name: "Furina",
         class: "theme-furina",
-        sticker: "https://frostmoonenclave.github.io/0x/root/media/FurinaStatic.png",
-        indicator: "https://frostmoonenclave.github.io/0x/root/media/GenshinImpact.mp4",
+        sticker: "./root/media/FurinaStatic.png",
+        indicator: "./root/media/IndicatorFurina.webm",
         primary: "#698ae8",
         primaryDark: "#8ab4f8",
         headerDark: "#131c30",
@@ -11,13 +11,13 @@ const themes = [
         bgDarkTextOut: "#0d1424",
         //btnBgDark: "",
         //btnTextDark: "",
-        hover: "rgba(26, 115, 232, 0.1)"
+        hover: "rgba(26, 115, 232, 0.15)"
     },
     {
         name: "Hu Tao",
         class: "theme-hutao",
-        sticker: "https://frostmoonenclave.github.io/0x/root/media/HuTaoStatic.png",
-        indicator: "./0x/root/media/HuTao.gif",
+        sticker: "./root/media/HuTaoStatic.png",
+        indicator: "./root/media/IndicatorHuTao.webm",
         primary: "#ac1e1e",
         primaryDark: "#ff8a65",
         headerDark: "#261515",
@@ -30,8 +30,8 @@ const themes = [
     {
         name: "Shogun ♡",
         class: "theme-shogun",
-        sticker: "https://frostmoonenclave.github.io/0x/root/media/Shogun0.gif",
-        indicator: "https://frostmoonenclave.github.io/0x/root/media/IndicatorShogun.mp4",
+        sticker: "./root/media/Shogun0.gif",
+        indicator: "./root/media/IndicatorShogun.webm",
         primary: "#2a2263",
         primaryDark: "#8e5ce3",
         headerDark: "#1d152e",
@@ -39,13 +39,13 @@ const themes = [
         bgDarkTextOut: "#150f21",
         btnBgDark: "#8e5ce3",
         btnTextDark: "white",
-        hover: "rgba(142, 36, 170, 0.1)"
+        hover: "rgba(142, 36, 170, 0.15)"
     },
     {
         name: "Nahida",
         class: "theme-nahida",
-        sticker: "https://frostmoonenclave.github.io/0x/root/media/NahidaStatic.png",
-        indicator: "https://frostmoonenclave.github.io/0x/root/media/Nahida.gif",
+        sticker: "./root/media/NahidaStatic.png",
+        indicator: "./root/media/IndicatorNahida.webm",
         primary: "#7a9e1d",
         primaryDark: "#b5dd47",
         headerDark: "#1a2111",
@@ -58,7 +58,7 @@ const themes = [
     {
         name: "Zhongli",
         class: "theme-zhongli",
-        sticker: "https://frostmoonenclave.github.io/0x/root/media/ZhongliStatic.webp",
+        sticker: "./root/media/ZhongliStatic.webp",
         indicator: "",
         primary: "#614539",
         primaryDark: "#e8c660",
@@ -72,7 +72,7 @@ const themes = [
     {
         name: "Venti",
         class: "theme-venti",
-        sticker: "https://frostmoonenclave.github.io/0x/root/media/VentiStatic.png",
+        sticker: "./root/media/VentiStatic.png",
         indicator: "",
         primary: "#33987b",
         primaryDark: "#33987b",
@@ -86,7 +86,7 @@ const themes = [
     {
         name: "Shenhe",
         class: "theme-shenhe",
-        sticker: "https://frostmoonenclave.github.io/0x/root/media/ShenheStatic.webp",
+        sticker: "./root/media/ShenheStatic.webp",
         indicator: "",
         primary: "#8eb4ab",
         primaryDark: "#c0d8dd",
@@ -100,8 +100,8 @@ const themes = [
     {
         name: "Columbina",
         class: "theme-columbina",
-        sticker: "https://frostmoonenclave.github.io/0x/root/media/ColumbinaStatic.webp",
-        indicator: "https://frostmoonenclave.github.io/0x/root/media/IndicatorColumbina.mp4",
+        sticker: "./root/media/ColumbinaStatic.webp",
+        indicator: "./root/media/IndicatorColumbina.webm",
         primary: "#dc2f7e",
         primaryDark: "#ff89c4",
         headerDark: "#2b1620",
@@ -114,8 +114,8 @@ const themes = [
     {
         name: "Skirk",
         class: "theme-skirk",
-        sticker: "https://frostmoonenclave.github.io/0x/root/media/SkirkStatic.webp",
-        indicator: "https://frostmoonenclave.github.io/0x/root/media/IndicatorSkirk.mp4",
+        sticker: "./root/media/SkirkStatic.webp",
+        indicator: "./root/media/IndicatorSkirk.webm",
         primary: "#3622fe",
         primaryDark: "#6a68f1", //a5abd6
         headerDark: "#141624",
@@ -130,5 +130,6 @@ const themes = [
 const fonts = [
     { name: "Roboto", class: "font-roboto" },
     { name: "Playwrite", class: "font-playwrite" },
-    { name: "Pacifico", class: "font-pacifico" }
+    { name: "Pacifico", class: "font-pacifico" },
+ // { name: "NotoSansSC", class: "font-noto-sans-sc" }
 ];
