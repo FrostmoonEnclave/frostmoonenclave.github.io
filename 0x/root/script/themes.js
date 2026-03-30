@@ -115,7 +115,7 @@ const themes = [
         name: "Skirk",
         class: "theme-skirk",
         sticker: "https://frostmoonenclave.github.io/0x/root/media/SkirkStatic.webp",
-        indicator: "../root/media/IndicatorSkirk.mp4",
+        indicator: "root/media/IndicatorSkirk.mp4",
         primary: "#3622fe",
         primaryDark: "#6a68f1", //a5abd6
         headerDark: "#141624",
