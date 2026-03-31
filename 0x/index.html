@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 
@@ -118,24 +119,27 @@
                 </h1>
             </div>
             
-            <div class="flex items-center gap-2 md:gap-4">
-                <button onclick="changeFont()" class="p-2 justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors" title="Change Font">
-                    <svg class='w-5 h-5 dark:fill-white' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>
+            <div class="flex items-center gap-1 md:gap-4">
+                <button onclick="changeFont()" class="font-noto-sans-sc flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700" title="Change Font">
+                    <!--svg class='w-5 h-5 dark:fill-white' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>
                         <rect width='32' height='32' rx='6' fill='transparent' />
                         <text x='50%' y='50%' class='w-5 h-5 dark:fill-white font-noto-sans-sc font-extrabold' dominant-baseline='central' text-anchor='middle' font-size='32'>A</text>
-                    </svg>
+                    </svg-->
+                    <span class="text-lg font-extrabold text-black dark:text-white">A</span>
                 </button>
-                <button onclick="toggleDarkMode()" class="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors" title="Toggle Dark Mode">
-                    <svg id="moonIcon" class="w-5 h-5 block dark:hidden" xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>
+                <button onclick="toggleDarkMode()" class="font-noto-sans-sc flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700" title="Toggle Dark Mode">
+                    <!--svg id="moonIcon" class="w-5 h-5 block dark:hidden" xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>
                         <rect width='32' height='32' rx='6' fill='transparent' />
                         <text x='50%' y='50%' class='w-5 h-5 block dark:hidden dark:fill-white font-noto-sans-sc' dominant-baseline='central' text-anchor='middle' font-size='28'>暗</text>
                     </svg>
                     <svg id="sunIcon" class="w-5 h-5 hidden dark:block" xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>
                         <rect width='32' height='32' rx='6' fill='transparent' />
                         <text x='50%' y='50%' class='w-5 h-5 hidden dark:block dark:fill-white font-noto-sans-sc' dominant-baseline='central' text-anchor='middle' font-size='28'>光</text>
-                    </svg>
+                    </svg-->
+                    <span class="block text-lg dark:hidden">暗</span>
+                    <span class="hidden text-lg dark:block dark:text-white">光</span>
                 </button>
-                <button onclick="clearAll()" class="font-noto-sans-sc font-medium text-sm text-themePrimary dark:text-themeDark hover:bg-themeHover dark:hover:bg-gray-800 px-4 py-2 rounded-full transition-colors">Clear</button>
+                <button onclick="clearAll()" class="font-noto-sans-sc text-sm px-4 py-2 rounded-full transition-colors text-themePrimary hover:bg-gray-100 dark:text-themeDark dark:hover:bg-white/10">Clear</button>
             </div>
         </div>
     </header>
