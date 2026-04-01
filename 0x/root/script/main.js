@@ -23,7 +23,7 @@ function nextTheme() {
     applyTheme(currentThemeIndex);
     localStorage.setItem('selectedThemeIndex', currentThemeIndex);
     
-    showToast(`Theme: ${themes[currentThemeIndex].name}`);
+    showToast(`${themes[currentThemeIndex].name}`);
 }
 
 function applyTheme(index) {
