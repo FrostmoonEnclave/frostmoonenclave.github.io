@@ -59,7 +59,7 @@ const themes = [
         name: "Zhongli",
         class: "theme-zhongli",
         sticker: "./root/media/ZhongliStatic.webp",
-        indicator: "./root/media/IndicatorZhongli.webp",
+        indicator: "./root/media/IndicatorZhongli.webm",
         primary: "#614539",
         primaryDark: "#e8c660",
         headerDark: "#241f19",
@@ -128,8 +128,13 @@ const themes = [
 ];
 
 const fonts = [
-    { name: "Roboto", class: "font-roboto" },
-    { name: "Playwrite", class: "font-playwrite" },
+    { name: "Google Sans", class: "google-sans" },
+    { name: "Playwrite IE", class: "font-playwrite" },
     { name: "Pacifico", class: "font-pacifico" },
- // { name: "NotoSansSC", class: "font-noto-sans-sc" }
+    { name: "Damion", class: "font-damion" },
+ // { name: "Noto Sans SC", class: "font-noto-sans-sc" },
+    { name: "Playwrite DE Grund", class: "font-playwrite-de-grund" },
+    { name: "Fugaz One", class: "font-fugaz-one" },
+    { name: "Norican", class: "font-norican" },
+    { name: "Edu AU VIC WA NT Pre", class: "font-edu-au-vic-wa-nt-pre" },
 ];
