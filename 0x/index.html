@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="赤红FLOWER">
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#202124" media="(prefers-color-scheme: dark)">
     <title>𝗣𝗿𝗲𝗳𝗶𝘅 𝗦𝘁𝘂𝗱𝗶𝗼 - HEX Encoder / Decoder</title>
@@ -126,6 +127,27 @@
             background: #cbd5e1;
             border-radius: 10px;
         }
+        
+        .renowned-title {
+            font-weight: bold;
+            background: linear-gradient(to right,
+                    #ff2400, #ff8c00, #e8b923, #00bb31, #00bfff, #4169e1, #8a2be2);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-move 4s linear infinite;
+            display: inline-block;
+        }
+        
+        @keyframes gradient-move {
+            0% {
+                background-position: 0% center;
+            }
+            
+            100% {
+                background-position: 200% center;
+            }
+        }
     </style>
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='transparent'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' fill='%23698ae8' font-family='monospace' font-size='34'>❂</text></svg>">
@@ -146,21 +168,9 @@
             
             <div class="flex items-center gap-1 md:gap-4">
                 <button onclick="changeFont()" class="font-noto-sans-sc flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700" title="Change Font">
-                    <!--svg class='w-5 h-5 dark:fill-white' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>
-                        <rect width='32' height='32' rx='6' fill='transparent' />
-                        <text x='50%' y='50%' class='w-5 h-5 dark:fill-white font-noto-sans-sc font-extrabold' dominant-baseline='central' text-anchor='middle' font-size='32'>A</text>
-                    </svg-->
                     <span class="text-lg font-extrabold text-black dark:text-white">A</span>
                 </button>
                 <button onclick="toggleDarkMode()" class="font-noto-sans-sc flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700" title="Toggle Dark Mode">
-                    <!--svg id="moonIcon" class="w-5 h-5 block dark:hidden" xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>
-                        <rect width='32' height='32' rx='6' fill='transparent' />
-                        <text x='50%' y='50%' class='w-5 h-5 block dark:hidden dark:fill-white font-noto-sans-sc' dominant-baseline='central' text-anchor='middle' font-size='28'>暗</text>
-                    </svg>
-                    <svg id="sunIcon" class="w-5 h-5 hidden dark:block" xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>
-                        <rect width='32' height='32' rx='6' fill='transparent' />
-                        <text x='50%' y='50%' class='w-5 h-5 hidden dark:block dark:fill-white font-noto-sans-sc' dominant-baseline='central' text-anchor='middle' font-size='28'>光</text>
-                    </svg-->
                     <span class="block text-lg dark:hidden">暗</span>
                     <span class="hidden text-lg dark:block dark:text-white">光</span>
                 </button>
@@ -238,8 +248,23 @@
         [Action completed]
     </div>
     
+    <footer class="google-sans !font-normal py-8 px-4 text-center">
+        <div class="max-w-screen-xl mx-auto space-y-2">
+            <p class="text-sm sm:text-base">
+                Created with <img src="./root/media/HuTaoStatic1.png" alt="Hu Tao: Love" class="inline-block w-8 align-middle mx-1">
+                by the Guardian of Celestial "Laws"：
+                <span class="font-sans text-[16px] renowned-title">赤红FLOWER <span class="text-[18px]">🜲</span></span>
+            </p>
+            <p class="text-xs sm:text-sm">
+                <span class="text-gray-700 dark:text-gray-300 italic">All of the video clips and images used are owned by my beloved Genshin Impact &lt;3</span>
+                <a href="./credits/" class="ml-2 text-sm">view_sources</a>
+            </p>
+        </div>
+    </footer>
+    
     <script src="./root/script/themes.js"></script>
     <script src="./root/script/main.js"></script>
+    
 </body>
 
 </html>
