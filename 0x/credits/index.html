@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>𝗣𝗿𝗲𝗳𝗶𝘅 𝘀𝘁𝘂𝗱𝗶𝗼 - List of External Resources</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='transparent'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' fill='%23698ae8' font-family='monospace' font-size='34'>❂</text></svg>">
+    
+    <style>
+        .renowned-title {
+            font-weight: bold;
+            background: linear-gradient(to right,
+                    #ff2400, #ff8c00, #e8b923, #00bb31, #00bfff, #4169e1, #8a2be2);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-move 4s linear infinite;
+            display: inline-block;
+        }
+        
+        @keyframes gradient-move {
+            0% {
+                background-position: 0% center;
+            }
+            
+            100% {
+                background-position: 200% center;
+            }
+        }
+    </style>
+</head>
+
+<body class="p-6 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold mb-8 border-b border-gray-200 dark:border-gray-700 pb-2">
+            List of External Resources and their Sources
+        </h1>
+        
+        <div id="resource-container"></div>
+    </div>
+    
+    <center>
+        <p class="renowned-title text-center text-[16px]">✦ 赤红FLOWER ✦</p>
+    </center>
+    
+    <script src="../root/script/sourceDat.js"></script>
+</body>
+
+</html>
