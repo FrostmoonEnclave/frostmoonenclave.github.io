@@ -1,3 +1,5 @@
+// /root/script/themes.js
+
 const themes = [
     {
         name: "Furina",
@@ -9,8 +11,8 @@ const themes = [
         headerDark: "#131c30",
         bgDark: "#090d16",
         bgDarkTextOut: "#0d1424",
-        //btnBgDark: "",
-        //btnTextDark: "",
+     // btnBgDark: "",
+     // btnTextDark: "",
         hover: "rgba(26, 115, 232, 0.15)"
     },
     {
@@ -51,8 +53,8 @@ const themes = [
         headerDark: "#1a2111",
         bgDark: "#0b1007",
         bgDarkTextOut: "#12180a",
-        //btnBgDark: "",
-        //btnTextDark: "",
+     // btnBgDark: "",
+     // btnTextDark: "",
         hover: "rgba(181, 221, 71, 0.15)"
     },
     {
@@ -65,8 +67,8 @@ const themes = [
         headerDark: "#241f19",
         bgDark: "#14110f",
         bgDarkTextOut: "#1a1612",
-        //btnBgDark: "",
-        //btnTextDark: "",
+     // btnBgDark: "",
+     // btnTextDark: "",
         hover: "rgba(97, 69, 57, 0.15)"
     },
     {
@@ -93,8 +95,8 @@ const themes = [
         headerDark: "#172222",
         bgDark: "#0a1111",
         bgDarkTextOut: "#111818",
-        //btnBgDark: "",
-        //btnTextDark: "",
+     // btnBgDark: "",
+     // btnTextDark: "",
         hover: "rgba(192, 218, 221, 0.15)"
     },
     {
@@ -124,6 +126,18 @@ const themes = [
         btnBgDark: "#6a68f1",
         btnTextDark: "#fff",
         hover: "rgba(195, 193, 249, 0.15)" /* Fixed a small typo here: periods to commas */
+    },
+    {
+        name: "Nicole ✦",
+        class: "theme-nicole",
+        sticker: "./root/media/NicoleStatic.png",
+        indicator: "./root/media/IndicatorNicole.webm",
+        primary: "#8893e2",
+        primaryDark: "#f8e2b8",
+        headerDark: "#1a1f2e",
+        bgDark: "#0f121f",
+        bgDarkTextOut: "#151a29",
+        hover: "rgba(136, 147, 226, 0.15)" // #8893e2 with 0.15 alpha
     }
 ];
 
