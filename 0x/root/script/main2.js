@@ -1,191 +1,200 @@
 // /root/script/main.js
 
-const DB_NAME = 'PrefixStudioDB';
-const DB_VERSION = 1;
+let isTextToHex = true;
+let currentThemeIndex = 0;
+let currentFontIndex = 0;
+
+const DB_NAME = '0xStudio_Assets_v2'; // Incremented version to clear old Blob-based stores
 const STORE_NAME = 'media_cache';
 
-async function openDB() {
+async function initDB() {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onupgradeneeded = () => {
-            request.result.createObjectStore(STORE_NAME);
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME);
+            }
         };
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
     });
 }
 
-async function getCachedMedia(url) {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction(STORE_NAME, 'readonly');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.get(url);
-        
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = (event) => {
-            console.error(`Get failed for ${url}:`, event.target.error);
-            reject(event.target.error);
-        };
-    });
-}
-
-async function cacheMedia(url) {
-    const existing = await getCachedMedia(url);
-    if (existing) {
-        console.log(`[Cache] Already cached: ${url}`);
-        return existing;
-    }
+async function processMedia(url) {
+    if (!url) return null;
+    const db = await initDB();
     
     try {
-        console.log(`[Cache] Fetching: ${url}`);
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status} - ${response.statusText}`);
-        }
-        
-        const blob = await response.blob();
-        console.log(`[Cache] Fetched blob: ${blob.size} bytes, type: ${blob.type} for ${url}`);
-        
-        const db = await openDB();
-        const transaction = db.transaction(STORE_NAME, 'readwrite');
-        const store = transaction.objectStore(STORE_NAME);
-        
-        return new Promise((resolve, reject) => {
-            const request = store.put(blob, url);
-            
-            request.onsuccess = () => {
-                console.log(`[Cache] Successfully stored: ${url}`);
-                resolve(blob);
-            };
-            
-            request.onerror = (event) => {
-                console.error(`[Cache] Put request failed for ${url}:`, event.target.error);
-                reject(event.target.error);
-            };
-            
-            // Also listen to transaction errors
-            transaction.onerror = (event) => {
-                console.error(`[Cache] Transaction error for ${url}:`, event.target.error);
-            };
-            
-            transaction.oncomplete = () => {
-                console.log(`[Cache] Transaction completed for ${url}`);
-            };
+        // IndexedDB Cache
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const buffer = await new Promise((res) => {
+            const req = store.get(url);
+            req.onsuccess = () => res(req.result);
+            req.onerror = () => res(null);
         });
-    } catch (e) {
-        console.error(`[Cache] Failed for ${url}:`, e.name || e, e.message || e);
         
-        // Extra hint for quota issues
-        if (e.name === 'QuotaExceededError' || (e.message && e.message.includes('quota'))) {
-            console.error("💥 IndexedDB quota exceeded! Try clearing site data or using smaller files.");
+        if (buffer) {
+            // Determine MIME type based on extension
+            const type = url.toLowerCase().endsWith('.webm') ? 'video/webm' : 'image/png';
+            return URL.createObjectURL(new Blob([buffer], { type }));
         }
         
-        return null;
+        // Fetch from Network if not cached
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
+        
+        // Convert to ArrayBuffer (The "Incognito Cure")
+        const data = await response.arrayBuffer();
+        
+        // Save to DB for next time
+        const saveTx = db.transaction(STORE_NAME, 'readwrite');
+        saveTx.objectStore(STORE_NAME).put(data, url);
+        
+        const type = url.toLowerCase().endsWith('.webm') ? 'video/webm' : 'image/png';
+        return URL.createObjectURL(new Blob([data], { type }));
+        
+    } catch (err) {
+        console.warn(`Storage fallback for: ${url}`, err);
+        return url; // Return original URL so app doesn't break if DB fails
     }
 }
 
-let isTextToHex = true;
-let currentThemeIndex = 0;
-let currentFontIndex = 0;
+/**
+ * Global Bootstrapper
+ */
+async function preloadAppAssets() {
+    const percentEl = document.getElementById('load-percent');
+    const statusTextEl = document.getElementById('load-status-text');
+    const loaderScreen = document.getElementById('loading-screen');
+    
+    // Compile list of all unique assets to load
+    const assetUrls = [
+        "./root/media/HuTaoStatic1.png",
+        ...themes.flatMap(t => [t.sticker, t.indicator])
+    ].filter(Boolean);
+    
+    let loadedCount = 0;
+    
+    // Process all assets concurrently
+    await Promise.all(assetUrls.map(async (url) => {
+        const blobUrl = await processMedia(url);
+        
+        // Map the generated Blob URL back to the themes array
+        themes.forEach(theme => {
+            if (theme.sticker === url) theme.blobSticker = blobUrl;
+            if (theme.indicator === url) theme.blobIndicator = blobUrl;
+        });
+        
+        if (url.includes('HuTaoStatic1')) window.footerImageBlobUrl = blobUrl;
+        
+        loadedCount++;
+        const percent = Math.floor((loadedCount / assetUrls.length) * 100);
+        if (percentEl) percentEl.innerText = percent;
+    }));
+    
+    /*/ Hide loader and signal main.js to start
+    if (loaderScreen) {
+        loaderScreen.style.opacity = '0';
+        setTimeout(() => {
+            loaderScreen.style.display = 'none';
+            window.dispatchEvent(new Event('assetsLoaded'));
+        }, 500);
+    }*/
+        // Signal main.js that assets are ready FIRST
+    window.dispatchEvent(new Event('assetsLoaded'));
+    
+}
 
-// --- Dark Mode ---
 function toggleDarkMode() {
     const isDark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
-    
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (metaThemeColor) {
-        metaThemeColor.setAttribute('content', isDark ? '#202124' : '#ffffff');
-    }
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#202124' : '#ffffff');
 }
 
-// --- Theme Logic ---
 function nextTheme() {
     document.body.classList.remove(themes[currentThemeIndex].class);
     currentThemeIndex = (currentThemeIndex + 1) % themes.length;
-    
     applyTheme(currentThemeIndex);
     localStorage.setItem('selectedThemeIndex', currentThemeIndex);
-    
     showToast(`${themes[currentThemeIndex].name}`);
 }
 
-async function applyTheme(index) {
+function applyTheme(index) {
     const theme = themes[index];
     currentThemeIndex = index;
     
     document.body.classList.add(theme.class);
-    document.documentElement.style.setProperty('--theme-primary', theme.primary);
-    document.documentElement.style.setProperty('--theme-dark', theme.primaryDark);
-    document.documentElement.style.setProperty('--theme-hover', theme.hover);
-    document.documentElement.style.setProperty('--theme-header-dark', theme.headerDark);
-    document.documentElement.style.setProperty('--theme-bg-dark', theme.bgDark);
-    document.documentElement.style.setProperty('--theme-textout-dark', theme.bgDarkTextOut);
-    document.documentElement.style.setProperty('--theme-text-btn-dark', theme.btnTextDark);
-    document.documentElement.style.setProperty('--theme-bg-btn-dark', theme.btnBgDark);
-    document.documentElement.style.setProperty('--theme-bg-btn-dark', theme.btnBgDark || theme.primaryDark);
+    const root = document.documentElement;
+    root.style.setProperty('--theme-primary', theme.primary);
+    root.style.setProperty('--theme-dark', theme.primaryDark);
+    root.style.setProperty('--theme-hover', theme.hover);
+    root.style.setProperty('--theme-header-dark', theme.headerDark);
+    root.style.setProperty('--theme-bg-dark', theme.bgDark);
+    root.style.setProperty('--theme-textout-dark', theme.bgDarkTextOut);
+    root.style.setProperty('--theme-bg-btn-dark', theme.btnBgDark || theme.primaryDark);
+    root.style.setProperty('--theme-text-btn-dark', theme.btnTextDark || '#202124');
     
-    // If btnTextDark is missing, use #202124 (your dark mode background color) for high contrast.
-    document.documentElement.style.setProperty('--theme-text-btn-dark', theme.btnTextDark || '#202124');
-
     const stickerImg = document.getElementById('sticker-img');
     const indicator = document.getElementById('indicator');
-
-    // Handle Video from Cache
-    if (indicator && theme.indicator) {
-        console.log(`Applying indicator: ${theme.indicator}`);
-        const videoBlob = await getCachedMedia(theme.indicator);
     
-        if (videoBlob) {
-            console.log(`Using cached blob (${videoBlob.size} bytes)`);
-            const objectUrl = URL.createObjectURL(videoBlob);
-            indicator.src = objectUrl;
-            // Optional: revoke later if you want (but not necessary for <video>)
-        } else {
-            console.warn(`No cached blob, falling back to direct URL: ${theme.indicator}`);
-            indicator.src = theme.indicator;
-        }
-    
-        indicator.load();
-        indicator.play().catch(e => console.warn("Video play failed:", e));
+    // Use the Blob URLs generated in storage.js
+    if (stickerImg) stickerImg.src = theme.blobSticker || theme.sticker;
+    if (indicator) {
+        indicator.src = theme.blobIndicator || theme.indicator;
+        indicator.load(); // Required for some browsers to refresh video source
     }
 }
 
-// --- Font Logic ---
-function changeFont() {
-    document.body.classList.remove(fonts[currentFontIndex].class);
-    currentFontIndex = (currentFontIndex + 1) % fonts.length;
-    
-    applyFont(currentFontIndex);
-    localStorage.setItem('selectedFontIndex', currentFontIndex);
-    showToast(`Font: ${fonts[currentFontIndex].name}`);
-}
-
 function applyFont(index) {
+    document.body.classList.remove(fonts[currentFontIndex].class);
     currentFontIndex = index;
     document.body.classList.add(fonts[index].class);
 }
 
+function changeFont() {
+    const newIndex = (currentFontIndex + 1) % fonts.length;
+    applyFont(newIndex);
+    localStorage.setItem('selectedFontIndex', newIndex);
+    showToast(`Font: ${fonts[newIndex].name}`);
+}
+
 // --- App Initialization ---
-window.addEventListener('DOMContentLoaded', () => {
-    const isDark = document.documentElement.classList.contains('dark');
+window.addEventListener('assetsLoaded', () => {
+    // 1. Initial Dark Mode Setup
+    const isDark = localStorage.getItem('darkMode') === 'enabled';
+    if (isDark) document.documentElement.classList.add('dark');
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#202124' : '#ffffff');
     
-    const savedThemeIndex = localStorage.getItem('selectedThemeIndex');
-    if (savedThemeIndex !== null) applyTheme(parseInt(savedThemeIndex));
+    // 2. Footer Image
+    const footerImg = document.querySelector('footer img');
+    if (footerImg && window.footerImageBlobUrl) footerImg.src = window.footerImageBlobUrl;
+
+    // 3. Load State & Apply Themes (This changes the DOM immediately)
+    const savedTheme = localStorage.getItem('selectedThemeIndex') || 0;
+    const savedFont = localStorage.getItem('selectedFontIndex') || 0;
     
-    const savedFontIndex = localStorage.getItem('selectedFontIndex');
-    if (savedFontIndex !== null) {
-        applyFont(parseInt(savedFontIndex));
-    } else {
-        applyFont(0);
-    }
+    applyTheme(parseInt(savedTheme));
+    applyFont(parseInt(savedFont));
     setMode(isTextToHex);
+
+    // 4. NOW fade out the loading screen, after the UI is perfectly set up!
+    const loaderScreen = document.getElementById('loading-screen');
+    if (loaderScreen) {
+        // A tiny 50ms delay ensures the browser has painted the new theme colors
+        setTimeout(() => {
+            loaderScreen.style.opacity = '0';
+            setTimeout(() => {
+                loaderScreen.style.display = 'none';
+            }, 500); // Matches your CSS transition duration
+        }, 50);
+    }
 });
 
-// --- UI & Conversion Logic ---
+// Kick off the preloader as soon as the DOM is parsed
+window.addEventListener('DOMContentLoaded', preloadAppAssets);
+
 function setMode(toHex) {
     isTextToHex = toHex;
     const btn1 = document.getElementById('modeTextToHex');
@@ -195,20 +204,19 @@ function setMode(toHex) {
     const inArea = document.getElementById('inputArea');
     const outArea = document.getElementById('outputArea');
     
-    // Define the active and inactive classes once to avoid typos
-    const activeClasses = "px-6 py-2 rounded-full text-sm font-medium transition-all bg-themePrimary text-white shadow-sm dark:bg-themeBgBtnDark dark:text-themeTextBtnDark";
-    const inactiveClasses = "px-6 py-2 rounded-full text-sm font-medium transition-all text-themePrimary dark:text-themeDark hover:bg-gray-100 dark:hover:bg-gray-800";
+    const active = "px-6 py-2 rounded-full text-sm font-medium transition-all bg-themePrimary text-white shadow-sm dark:bg-themeBgBtnDark dark:text-themeTextBtnDark";
+    const inactive = "px-6 py-2 rounded-full text-sm font-medium transition-all text-themePrimary dark:text-themeDark hover:bg-gray-100 dark:hover:bg-gray-800";
     
     if (isTextToHex) {
-        btn1.className = activeClasses;
-        btn2.className = inactiveClasses;
+        btn1.className = active;
+        btn2.className = inactive;
         inLabel.innerText = "Source Text";
         outLabel.innerText = "Hexadecimal";
         inArea.classList.remove('mono');
         outArea.classList.add('mono');
     } else {
-        btn2.className = activeClasses;
-        btn1.className = inactiveClasses;
+        btn2.className = active;
+        btn1.className = inactive;
         inLabel.innerText = "Hexadecimal";
         outLabel.innerText = "Plain Text";
         inArea.classList.add('mono');
@@ -217,12 +225,14 @@ function setMode(toHex) {
     clearAll();
 }
 
-
 function convert() {
     const val = document.getElementById('inputArea').value;
     const output = document.getElementById('outputArea');
     const delimiter = document.getElementById('delimiter').value;
-    if (!val) { output.value = ""; return; }
+    if (!val) {
+        output.value = "";
+        return;
+    }
     
     if (isTextToHex) {
         const bytes = new TextEncoder().encode(val);
@@ -233,21 +243,10 @@ function convert() {
         try {
             const bytes = new Uint8Array(hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
             output.value = new TextDecoder().decode(bytes);
-        } catch (e) { output.value = "Invalid Hex"; }
+        } catch (e) {
+            output.value = "Invalid Hex";
+        }
     }
-}
-
-// --- Utility Functions ---
-function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        document.getElementById('inputArea').value = e.target.result;
-        convert();
-        showToast("File loaded");
-    };
-    reader.readAsText(file);
 }
 
 function showToast(msg) {
@@ -282,14 +281,3 @@ async function copyOutput() {
     await navigator.clipboard.writeText(text);
     showToast("Copied!");
 }
-
-
-// Preload stickers for instant switching
-window.addEventListener('load', () => {
-    themes.forEach(theme => {
-        if (theme.sticker) {
-            const img = new Image();
-            img.src = theme.sticker;
-        }
-    });
-});
