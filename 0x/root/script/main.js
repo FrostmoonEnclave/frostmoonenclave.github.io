@@ -4,26 +4,113 @@ let isTextToHex = true;
 let currentThemeIndex = 0;
 let currentFontIndex = 0;
 
-// --- Dark Mode ---
-function toggleDarkMode() {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+const DB_NAME = 'Prefix_Studio_Assets_v2';
+const STORE_NAME = 'media_cache';
+
+async function initDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME);
+            }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function processMedia(url) {
+    if (!url) return null;
+    const db = await initDB();
     
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (metaThemeColor) {
-        metaThemeColor.setAttribute('content', isDark ? '#202124' : '#ffffff');
+    try {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const buffer = await new Promise((res) => {
+            const req = store.get(url);
+            req.onsuccess = () => res(req.result);
+            req.onerror = () => res(null);
+        });
+        
+        if (buffer) {
+            const type = url.toLowerCase().endsWith('.webm') ? 'video/webm' : 'image/png';
+            return URL.createObjectURL(new Blob([buffer], { type }));
+        }
+        
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
+        
+        const data = await response.arrayBuffer();
+        
+        const saveTx = db.transaction(STORE_NAME, 'readwrite');
+        saveTx.objectStore(STORE_NAME).put(data, url);
+        
+        const type = url.toLowerCase().endsWith('.webm') ? 'video/webm' : 'image/png';
+        return URL.createObjectURL(new Blob([data], { type }));
+        
+    } catch (err) {
+        console.warn(`Storage fallback for: ${url}`, err);
+        return url;
     }
 }
 
-// --- Theme Logic ---
+async function preloadAppAssets() {
+    const percentEl = document.getElementById('load-percent');
+    const assetUrls = [
+        "./root/media/HuTaoStatic1.png",
+        ...themes.flatMap(t => [t.sticker, t.indicator])
+    ].filter(Boolean);
+    
+    let loadedCount = 0;
+    const total = assetUrls.length;
+    
+    const updateProgress = () => {
+        loadedCount++;
+        const percent = Math.floor((loadedCount / total) * 100);
+        if (percentEl) {
+            requestAnimationFrame(() => {
+                percentEl.innerText = `${percent}`;
+            });
+        }
+    };
+    
+    await Promise.all(assetUrls.map(async (url) => {
+        try {
+            const blobUrl = await processMedia(url);
+            
+            themes.forEach(theme => {
+                if (theme.sticker === url) theme.blobSticker = blobUrl;
+                if (theme.indicator === url) theme.blobIndicator = blobUrl;
+            });
+            
+            if (url.includes('HuTaoStatic1')) {
+                window.footerImageBlobUrl = blobUrl;
+            }
+            
+            updateProgress();
+        } catch (err) {
+            console.error(`Failed to load asset: ${url}`, err);
+            updateProgress();
+        }
+    }));
+    
+    window.dispatchEvent(new Event('assetsLoaded'));
+}
+
+function toggleDarkMode() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#202124' : '#ffffff');
+}
+
 function nextTheme() {
     document.body.classList.remove(themes[currentThemeIndex].class);
     currentThemeIndex = (currentThemeIndex + 1) % themes.length;
-    
     applyTheme(currentThemeIndex);
     localStorage.setItem('selectedThemeIndex', currentThemeIndex);
-    
-    showToast(`${themes[currentThemeIndex].name}`);
+    showToast(`Theme: ${themes[currentThemeIndex].name}`);
 }
 
 function applyTheme(index) {
@@ -31,59 +118,67 @@ function applyTheme(index) {
     currentThemeIndex = index;
     
     document.body.classList.add(theme.class);
-    document.documentElement.style.setProperty('--theme-primary', theme.primary);
-    document.documentElement.style.setProperty('--theme-dark', theme.primaryDark);
-    document.documentElement.style.setProperty('--theme-hover', theme.hover);
-    document.documentElement.style.setProperty('--theme-header-dark', theme.headerDark);
-    document.documentElement.style.setProperty('--theme-bg-dark', theme.bgDark);
-    document.documentElement.style.setProperty('--theme-textout-dark', theme.bgDarkTextOut);
-    document.documentElement.style.setProperty('--theme-text-btn-dark', theme.btnTextDark);
-    document.documentElement.style.setProperty('--theme-bg-btn-dark', theme.btnBgDark);
-    document.documentElement.style.setProperty('--theme-bg-btn-dark', theme.btnBgDark || theme.primaryDark);
-
-    // If btnTextDark is missing, use #202124 (your dark mode background color) for high contrast.
-    document.documentElement.style.setProperty('--theme-text-btn-dark', theme.btnTextDark || '#202124');
-
+    const root = document.documentElement;
+    root.style.setProperty('--theme-primary', theme.primary);
+    root.style.setProperty('--theme-dark', theme.primaryDark);
+    root.style.setProperty('--theme-hover', theme.hover);
+    root.style.setProperty('--theme-header-dark', theme.headerDark);
+    root.style.setProperty('--theme-bg-dark', theme.bgDark);
+    root.style.setProperty('--theme-textout-dark', theme.bgDarkTextOut);
+    root.style.setProperty('--theme-bg-btn-dark', theme.btnBgDark || theme.primaryDark);
+    root.style.setProperty('--theme-text-btn-dark', theme.btnTextDark || '#202124');
+    
     const stickerImg = document.getElementById('sticker-img');
     const indicator = document.getElementById('indicator');
-
-    if (stickerImg) stickerImg.src = theme.sticker;
-    if (indicator && theme.indicator) indicator.src = theme.indicator;
-}
-
-// --- Font Logic ---
-function changeFont() {
-    document.body.classList.remove(fonts[currentFontIndex].class);
-    currentFontIndex = (currentFontIndex + 1) % fonts.length;
     
-    applyFont(currentFontIndex);
-    localStorage.setItem('selectedFontIndex', currentFontIndex);
-    showToast(`Font: ${fonts[currentFontIndex].name}`);
+    if (stickerImg) stickerImg.src = theme.blobSticker || theme.sticker;
+    if (indicator) {
+        indicator.src = theme.blobIndicator || theme.indicator;
+        indicator.load();
+    }
 }
 
 function applyFont(index) {
+    document.body.classList.remove(fonts[currentFontIndex].class);
     currentFontIndex = index;
     document.body.classList.add(fonts[index].class);
 }
 
-// --- App Initialization ---
-window.addEventListener('DOMContentLoaded', () => {
-    const isDark = document.documentElement.classList.contains('dark');
+function changeFont() {
+    const newIndex = (currentFontIndex + 1) % fonts.length;
+    applyFont(newIndex);
+    localStorage.setItem('selectedFontIndex', newIndex);
+    showToast(`Font: ${fonts[newIndex].name}`);
+}
+
+window.addEventListener('assetsLoaded', () => {
+    const isDark = localStorage.getItem('darkMode') === 'enabled';
+    if (isDark) document.documentElement.classList.add('dark');
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#202124' : '#ffffff');
     
-    const savedThemeIndex = localStorage.getItem('selectedThemeIndex');
-    if (savedThemeIndex !== null) applyTheme(parseInt(savedThemeIndex));
-
-    const savedFontIndex = localStorage.getItem('selectedFontIndex');
-    if (savedFontIndex !== null) {
-        applyFont(parseInt(savedFontIndex));
-    } else {
-        applyFont(0);
-    }
+    const footerImg = document.querySelector('footer img');
+    if (footerImg && window.footerImageBlobUrl) footerImg.src = window.footerImageBlobUrl;
+    
+    const savedTheme = localStorage.getItem('selectedThemeIndex') || 0;
+    const savedFont = localStorage.getItem('selectedFontIndex') || 0;
+    
+    applyTheme(parseInt(savedTheme));
+    applyFont(parseInt(savedFont));
     setMode(isTextToHex);
+    
+    const loaderScreen = document.getElementById('loading-screen');
+    if (loaderScreen) {
+        setTimeout(() => {
+            loaderScreen.style.opacity = '0';
+            setTimeout(() => {
+                loaderScreen.style.display = 'none';
+            }, 500);
+        }, 50);
+    }
 });
 
-// --- UI & Conversion Logic ---
+window.addEventListener('DOMContentLoaded', preloadAppAssets);
+
 function setMode(toHex) {
     isTextToHex = toHex;
     const btn1 = document.getElementById('modeTextToHex');
@@ -93,20 +188,19 @@ function setMode(toHex) {
     const inArea = document.getElementById('inputArea');
     const outArea = document.getElementById('outputArea');
     
-    // Define the active and inactive classes once to avoid typos
-    const activeClasses = "px-6 py-2 rounded-full text-sm font-medium transition-all bg-themePrimary text-white shadow-sm dark:bg-themeBgBtnDark dark:text-themeTextBtnDark";
-    const inactiveClasses = "px-6 py-2 rounded-full text-sm font-medium transition-all text-themePrimary dark:text-themeDark hover:bg-gray-100 dark:hover:bg-gray-800";
-
+    const active = "px-6 py-2 rounded-full text-sm font-medium transition-all bg-themePrimary text-white shadow-sm dark:bg-themeBgBtnDark dark:text-themeTextBtnDark";
+    const inactive = "px-6 py-2 rounded-full text-sm font-medium transition-all text-themePrimary dark:text-themeDark hover:bg-gray-100 dark:hover:bg-gray-800";
+    
     if (isTextToHex) {
-        btn1.className = activeClasses;
-        btn2.className = inactiveClasses;
+        btn1.className = active;
+        btn2.className = inactive;
         inLabel.innerText = "Source Text";
         outLabel.innerText = "Hexadecimal";
         inArea.classList.remove('mono');
         outArea.classList.add('mono');
     } else {
-        btn2.className = activeClasses;
-        btn1.className = inactiveClasses;
+        btn2.className = active;
+        btn1.className = inactive;
         inLabel.innerText = "Hexadecimal";
         outLabel.innerText = "Plain Text";
         inArea.classList.add('mono');
@@ -115,13 +209,15 @@ function setMode(toHex) {
     clearAll();
 }
 
-
 function convert() {
     const val = document.getElementById('inputArea').value;
     const output = document.getElementById('outputArea');
     const delimiter = document.getElementById('delimiter').value;
-    if (!val) { output.value = ""; return; }
-
+    if (!val) {
+        output.value = "";
+        return;
+    }
+    
     if (isTextToHex) {
         const bytes = new TextEncoder().encode(val);
         output.value = Array.from(bytes).map(b => b.toString(16).toUpperCase().padStart(2, '0')).join(delimiter);
@@ -131,32 +227,28 @@ function convert() {
         try {
             const bytes = new Uint8Array(hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
             output.value = new TextDecoder().decode(bytes);
-        } catch (e) { output.value = "Invalid Hex"; }
+        } catch (e) {
+            output.value = "Invalid Hex";
+        }
     }
 }
 
-// --- Utility Functions ---
-function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        document.getElementById('inputArea').value = e.target.result;
-        convert();
-        showToast("File loaded");
-    };
-    reader.readAsText(file);
-}
+let toastTimer;
 
 function showToast(msg) {
     const toast = document.getElementById('toast');
     toast.innerText = msg;
     toast.style.opacity = "1";
     toast.style.transform = "translateX(-50%) translateY(0)";
-    setTimeout(() => {
+    
+    if (toastTimer) {
+        clearTimeout(toastTimer);
+    }
+    
+    toastTimer = setTimeout(() => {
         toast.style.opacity = "0";
         toast.style.transform = "translateX(-50%) translateY(40px)";
-    }, 2500);
+    }, 1500);
 }
 
 function clearAll() {
@@ -180,14 +272,3 @@ async function copyOutput() {
     await navigator.clipboard.writeText(text);
     showToast("Copied!");
 }
-
-
-// Preload stickers for instant switching
-window.addEventListener('load', () => {
-    themes.forEach(theme => {
-        if (theme.sticker) {
-            const img = new Image();
-            img.src = theme.sticker;
-        }
-    });
-});
