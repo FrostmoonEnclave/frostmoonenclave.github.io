@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[ ADD MSG ]</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' fill='%23698ae8' font-size='24'>❂</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500&family=Playwrite+IE&family=Space+Mono&family=Pacifico&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'media'
+        }
+    </script>
+
+    <style>
+        :root { color-scheme: light dark; }
+        #output {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.6;
+            font-family: 'Google Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body onload="handleDecrypt()" class="bg-slate-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen">
+    
+    <main class="max-w-4xl mx-auto px-6 py-12">
+        <div id="output" class="w-full text-sm text-justify text-balance text-lg opacity-90">
+            Decrypting message...
+        </div>
+    </main>
+    
+    <script>
+        const base64ToUint8 = (base64) => Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+
+        async function decryptData(ciphertextBase64, password) {
+            try {
+                const data = base64ToUint8(ciphertextBase64);
+                const iv = data.slice(0, 12);
+                const encrypted = data.slice(12);
+                const encoder = new TextEncoder();
+                const keyMaterial = await crypto.subtle.importKey(
+                    "raw", encoder.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]
+                );
+                const key = await crypto.subtle.deriveKey(
+                    { name: "PBKDF2", salt: encoder.encode('static-salt'), iterations: 100000, hash: "SHA-256" },
+                    keyMaterial,
+                    { name: "AES-GCM", length: 256 },
+                    false,
+                    ["decrypt"]
+                );
+                const decrypted = await crypto.subtle.decrypt(
+                    { name: "AES-GCM", iv: iv },
+                    key,
+                    encrypted
+                );
+                return new TextDecoder().decode(decrypted);
+            } catch (e) {
+                throw new Error("Decryption failed");
+            }
+        }
+
+        async function handleDecrypt() {
+            const pw = window.location.hash.substring(1);
+            const ct = "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";
+            const output = document.getElementById('output');
+
+            try {
+                const result = await decryptData(ct, pw);
+                output.innerText = result;
+            } catch (err) {
+                output.innerText = err.message;
+                output.classList.add("text-red-500");
+            }
+        }
+    </script>
+</body>
+</html>
